@@ -56,4 +56,3 @@ jobs:
                 ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 BRANCH: "main"
                 PUBLISH_REGISTRY_PASSWORD: ${{ secrets.PUBLISH_REGISTRY_PASSWORD }}
-                PUBLISH_REGISTRY_USERNAME: ${{ secrets.PUBLISH_REGISTRY_USERNAME }}
