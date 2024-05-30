@@ -41,6 +41,7 @@ jobs:
           - run: poetry run pytest  
     
     publish-package:
+        needs: test
         runs-on: ubuntu-latest
         permissions:
             contents: write
