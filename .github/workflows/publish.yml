@@ -1,0 +1,55 @@
+name: Build and publish python package
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v2
+
+          - uses: actions/setup-python@v2
+            with:
+              python-version: 3.11
+    
+          - name: cache poetry install
+            uses: actions/cache@v2
+            with:
+              path: ~/.local
+              key: poetry-1.8.3-0
+    
+          - uses: snok/install-poetry@v1
+            with:
+              version: 1.8.3
+              virtualenvs-create: true
+              virtualenvs-in-project: true
+    
+          - name: cache deps
+            id: cache-deps
+            uses: actions/cache@v2
+            with:
+              path: .venv
+              key: pydeps-${{ hashFiles('**/poetry.lock') }}
+    
+          - run: poetry install --no-interaction --no-root
+            if: steps.cache-deps.outputs.cache-hit != 'true'
+    
+          - run: poetry install --no-interaction
+    
+          - run: poetry run pytest  
+    
+    publish-package:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            - name: Publish PyPi package
+              uses: code-specialist/pypi-poetry-publish@v1           
+              with:
+                PACKAGE_DIRECTORY: "./src/"
+                PYTHON_VERSION: "3.11"
+                ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                PUBLISH_REGISTRY_PASSWORD: ${{ secrets.PUBLISH_REGISTRY_PASSWORD }}
+                PUBLISH_REGISTRY_USERNAME: ${{ secrets.PUBLISH_REGISTRY_USERNAME }}

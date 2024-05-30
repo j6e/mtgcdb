@@ -11,6 +11,7 @@ description = "MTG Card Database"
 authors = ["j6e <jongares@hotmail.com>"]
 license = "Apache 2.0"
 readme = "README.md"
+packages = [{ include = "mtgcdb", from = "./src/"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
