@@ -51,6 +51,7 @@ jobs:
               with:
                 PACKAGE_DIRECTORY: "./src/"
                 PYTHON_VERSION: "3.11"
+                POETRY_VERSION: "1.8.3"
                 ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 BRANCH: "main"
                 PUBLISH_REGISTRY_PASSWORD: ${{ secrets.PUBLISH_REGISTRY_PASSWORD }}
