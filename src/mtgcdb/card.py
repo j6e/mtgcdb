@@ -41,6 +41,3 @@ class CardIdentifier(Base):  # type: ignore
     scryfallId: Mapped[str]
 
     card: Mapped[Card] = relationship(back_populates="identifier", viewonly=True)
-
-
-# calling prepare() just sets up mapped classes and relationships.

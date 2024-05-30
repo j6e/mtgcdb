@@ -6,7 +6,7 @@ from sqlalchemy import create_engine, or_, select
 from sqlalchemy.orm import sessionmaker
 
 from mtgcdb.card import Base, Card
-from mtgcdb.db import clean_old_dbs, download_card_definitions_db, get_most_recent_db
+from mtgcdb.db import clean_old_dbs, download_card_definitions_db, update_or_pass
 
 
 class MTGCDB:
@@ -15,11 +15,15 @@ class MTGCDB:
     __instance: "MTGCDB | None" = None
 
     def __init__(self, force_update: bool = False):
-        if MTGCDB.__instance is not None and hasattr(self, "engine") and hasattr(self, "Session"):
+        if (
+            MTGCDB.__instance is not None
+            and hasattr(self, "engine")
+            and hasattr(self, "Session")
+        ):
             return MTGCDB.__instance  # type: ignore
 
-        self.db_path = get_most_recent_db() if not force_update else self.update_db()
-        self.engine = create_engine(f"sqlite:///{get_most_recent_db()}", echo=False)
+        self.db_path = update_or_pass() if not force_update else self.update_db()
+        self.engine = create_engine(f"sqlite:///{self.db_path}", echo=False)
         self.Session = sessionmaker(bind=self.engine)
         Base.prepare(self.engine)
 
@@ -50,7 +54,9 @@ class MTGCDB:
             return card
 
     @lru_cache(maxsize=1024)
-    def get_card_by_face_name(self, face_name: str, set_code: str | None = None) -> Card:
+    def get_card_by_face_name(
+        self, face_name: str, set_code: str | None = None
+    ) -> Card:
         """Get a card by its front face name
 
         Args:
@@ -77,10 +83,11 @@ class MTGCDB:
         Args:
             name (str): exact card name
             set_code (str | None, optional):  3 letters of the set code. Defaults to None.
-            img_type (str, optional): One of "png", "normal", "large" or "small". Defaults to "normal". See https://scryfall.com/docs/api/images for more info.
+            img_type (str, optional): One of "png", "normal", "large" or "small". Defaults to "normal".
+              See https://scryfall.com/docs/api/images for more info.
 
         Returns:
-            str: _description_
+            str: URL of the card image
         """
         c = self.get_card_by_name(name, set_code=set_code)
         img_format = "png" if img_type == "png" else "jpg"
@@ -98,12 +105,14 @@ class MTGCDB:
             list[Card]: List of cards
         """
         with self.Session() as session:
-            query = select(Card).where(or_(Card.name.in_(names), Card.faceName.in_(names)))
+            query = select(Card).where(
+                or_(Card.name.in_(names), Card.faceName.in_(names))
+            )
             results = session.scalars(query).all()
         return _deduplicate_cards_by_name(results)
 
     @lru_cache(maxsize=8)
-    def get_cards_by_setCode(self, setCode: str) -> list[Card]:
+    def get_cards_by_set_code(self, setCode: str) -> list[Card]:
         """Get all cards from a set by its set code
 
         Args:
@@ -134,8 +143,3 @@ def _deduplicate_cards_by_name(cards: Sequence[Card]) -> list[Card]:
             dedup_cards.append(card)
             card_names.add(card.name)
     return dedup_cards
-
-
-if __name__ == "__main__":
-    db = MTGCDB()
-    print(db.get_card_by_name("Snapcaster Mage"))

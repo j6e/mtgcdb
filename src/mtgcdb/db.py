@@ -14,6 +14,8 @@ CARD_DB_DOWNLOAD_URL = "https://mtgjson.com/api/v5/AllPrintings.sqlite.zip"
 AUTO_UPDATE_DB = True
 AUTO_UPDATE_DB_INTERVAL = 24 * 7  # in hours
 
+logger.disable("mtgcdb")
+
 
 def download_card_definitions_db() -> Path:
     """Download card definitions DB"""
@@ -60,7 +62,7 @@ def get_most_recent_db() -> Path | None:
     return latest_db_file_path
 
 
-def clean_old_dbs():
+def clean_old_dbs() -> None:
     """Clean old card definitions DBs"""
     db_folders = os.listdir(DB_GENERIC_PATH)
     if not db_folders:
@@ -70,11 +72,15 @@ def clean_old_dbs():
     for db_folder in db_folders[:-1]:
         db_folder_path = DB_GENERIC_PATH / db_folder
         logger.info(f"Removing old card definitions DB: {db_folder_path}")
-        os.rmdir(db_folder_path)
+        # Remove the folder and its contents
+        for file in db_folder_path.iterdir():
+            file.unlink()
+        db_folder_path.rmdir()
 
 
 def update_or_pass() -> Path:
-    """Check if the card definitions DB should be updated"""
+    """Check if the card definitions DB should be updated.
+    Returns the path to the most recent DB. If no DB is found, download a new one."""
 
     db_path = get_most_recent_db()
     if not db_path:
@@ -87,7 +93,9 @@ def update_or_pass() -> Path:
     time_diff_hours = time_diff.total_seconds() / 3600
 
     if time_diff_hours >= AUTO_UPDATE_DB_INTERVAL and AUTO_UPDATE_DB:
-        logger.info(f"Updating card definitions DB. Last updated {time_diff_hours/7:.2f} days ago")
+        logger.info(
+            f"Updating card definitions DB. Last updated {time_diff_hours/7:.2f} days ago"
+        )
         clean_old_dbs()
         return download_card_definitions_db()
     else:
@@ -95,6 +103,3 @@ def update_or_pass() -> Path:
             f"Skipping card definitions DB update. Last updated {time_diff_hours/7:.2f} days ago"
         )
         return db_path
-
-
-db_path = update_or_pass()
