@@ -6,7 +6,7 @@ disable_error_code = "import-untyped"
 
 [tool.poetry]
 name = "mtgcdb"
-version = "0.1.5"
+version = "0.1.6"
 description = "MTG Card Database"
 authors = ["j6e <jongares@hotmail.com>"]
 license = "Apache 2.0"
