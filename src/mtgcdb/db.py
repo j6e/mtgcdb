@@ -22,9 +22,7 @@ def download_card_definitions_db() -> Path:
     logger.info(f"Downloading card definitions DB from {CARD_DB_DOWNLOAD_URL}")
     response = httpx.get(CARD_DB_DOWNLOAD_URL)
     if response.status_code != 200:
-        logger.error(
-            f"Failed to download card definitions DB. Status code: {response.status_code}"
-        )
+        logger.error(f"Failed to download card definitions DB. Status code: {response.status_code}")
         raise Exception("Failed to download card definitions DB")
 
     zip_db = ZipFile(io.BytesIO(response.content))
@@ -94,12 +92,12 @@ def update_or_pass() -> Path:
 
     if time_diff_hours >= AUTO_UPDATE_DB_INTERVAL and AUTO_UPDATE_DB:
         logger.info(
-            f"Updating card definitions DB. Last updated {time_diff_hours/7:.2f} days ago"
+            f"Updating card definitions DB. Last updated {time_diff_hours / 7:.2f} days ago"
         )
         clean_old_dbs()
         return download_card_definitions_db()
     else:
         logger.info(
-            f"Skipping card definitions DB update. Last updated {time_diff_hours/7:.2f} days ago"
+            f"Skipping card definitions DB update. Last updated {time_diff_hours / 7:.2f} days ago"
         )
         return db_path

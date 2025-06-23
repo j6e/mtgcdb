@@ -42,9 +42,7 @@ def test_card_by_face_name(mtgcdb):
 
 
 def test_get_cards_by_names(mtgcdb):
-    cards = mtgcdb.get_cards_by_names(
-        ["Snapcaster Mage", "Fable of the Mirror-Breaker"]
-    )
+    cards = mtgcdb.get_cards_by_names(["Snapcaster Mage", "Fable of the Mirror-Breaker"])
     assert len(cards) == 2
     sorted(cards, key=lambda x: x.name)
     assert cards[0].name == "Snapcaster Mage"

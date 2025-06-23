@@ -32,6 +32,7 @@ def test_clean_old_dbs():
     new = folders[-1]
     clean_old_dbs()
     new_db = get_most_recent_db()
+    assert new_db is not None
     assert new == new_db.parent
 
     now_folders = sorted(DB_GENERIC_PATH.iterdir())

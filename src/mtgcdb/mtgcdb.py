@@ -15,11 +15,7 @@ class MTGCDB:
     __instance: "MTGCDB | None" = None
 
     def __init__(self, force_update: bool = False):
-        if (
-            MTGCDB.__instance is not None
-            and hasattr(self, "engine")
-            and hasattr(self, "Session")
-        ):
+        if MTGCDB.__instance is not None and hasattr(self, "engine") and hasattr(self, "Session"):
             return MTGCDB.__instance  # type: ignore
 
         self.db_path = update_or_pass() if not force_update else self.update_db()
@@ -54,9 +50,7 @@ class MTGCDB:
             return card
 
     @lru_cache(maxsize=1024)
-    def get_card_by_face_name(
-        self, face_name: str, set_code: str | None = None
-    ) -> Card:
+    def get_card_by_face_name(self, face_name: str, set_code: str | None = None) -> Card:
         """Get a card by its front face name
 
         Args:
@@ -105,9 +99,7 @@ class MTGCDB:
             list[Card]: List of cards
         """
         with self.Session() as session:
-            query = select(Card).where(
-                or_(Card.name.in_(names), Card.faceName.in_(names))
-            )
+            query = select(Card).where(or_(Card.name.in_(names), Card.faceName.in_(names)))
             results = session.scalars(query).all()
         return _deduplicate_cards_by_name(results)
 
