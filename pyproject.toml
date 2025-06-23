@@ -1,9 +1,9 @@
 [project]
 name = "mtgcdb"
-version = "0.1.7"
+dynamic = ["version"]
 description = "MTG Card Database"
 authors = [{ name = "j6e", email = "jongares@hotmail.com" }]
-requires-python = "~=3.11"
+requires-python = "~=3.12"
 readme = "README.md"
 license = "Apache-2.0"
 dependencies = [
