@@ -32,6 +32,9 @@ include = ["./src/mtgcdb"]
 [tool.hatch.build.targets.wheel]
 include = ["./src/mtgcdb"]
 
+[tool.hatch.version]
+path = "src/mtgcdb/__init__.py"
+
 [tool.hatch.build.targets.wheel.sources]
 "./src/mtgcdb" = "mtgcdb"
 
