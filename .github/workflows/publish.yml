@@ -5,54 +5,54 @@ on:
     types: [ published ]
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        steps:
-          - uses: actions/checkout@v2
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-          - uses: actions/setup-python@v2
-            with:
-              python-version: 3.11
-    
-          - name: cache poetry install
-            uses: actions/cache@v2
-            with:
-              path: ~/.local
-              key: poetry-1.8.3-0
-    
-          - uses: snok/install-poetry@v1
-            with:
-              version: 1.8.3
-              virtualenvs-create: true
-              virtualenvs-in-project: true
-    
-          - name: cache deps
-            id: cache-deps
-            uses: actions/cache@v2
-            with:
-              path: .venv
-              key: pydeps-${{ hashFiles('**/poetry.lock') }}
-    
-          - run: poetry install --no-interaction --no-root
-            if: steps.cache-deps.outputs.cache-hit != 'true'
-    
-          - run: poetry install --no-interaction
-    
-          - run: poetry run pytest  
-    
-    publish-package:
-        needs: test
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
-        steps:
-            - name: Publish PyPi package
-              uses: code-specialist/pypi-poetry-publish@v1.2
-              with:
-                PACKAGE_DIRECTORY: "./src/mtgcdb/"
-                PYTHON_VERSION: "3.11"
-                POETRY_VERSION: "1.8.3"
-                POETRY_CORE_VERSION: "1.9.0"
-                ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                BRANCH: "main"
-                PUBLISH_REGISTRY_PASSWORD: ${{ secrets.PUBLISH_REGISTRY_PASSWORD }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
+
+      - name: Run tests
+        # For example, using `pytest`
+        run: uv run pytest tests
+
+  publish-package:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+        contents: write
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+        cache-dependency-glob: uv.lock
+
+    - name: "Set up Python"
+      uses: actions/setup-python@v5
+      with:
+        python-version-file: "pyproject.toml"
+
+    - name: Install the project
+      run: uv sync --locked --all-extras --dev
+
+    - name: Build
+      run: uv build
+
+    - name: Publish
+      run: uv publish -t ${{ secrets.PUBLISH_REGISTRY_PASSWORD }}
+
